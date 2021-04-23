@@ -75,11 +75,59 @@ Shard allows queries to run in parallel, increasing the throughput of an index.
 
 `Shrink API` allows to decrease the number of shards in a index (involves create a new index)
 
+- List Shards
+```
+GET /_cat/shards?v
+```
+
+## Replication
+---
+Allows fault toleration replicating data (shards) across cluster nodes (replica shards).
+
+Replication is configured at the index level. Defaults is `1`.
+
+- `Primary Shard` - Shard that has been replicated.
+- `Replica Shard` - Copy of a Shard that can be used to serve search requests (Increase Throughput).
+- `Replication Group` - Primary Shards + Replica Shards.
+
+![Replication](./artifacts/2-Replication.png)
+
+## Snapshot
+---
+
+Elasticsearch supports taking snapshots as backups, allowing to restore to a given point in time. And you can snapshot:
+
+- `Index`
+- `Entire Cluster`
+
+## Node Roles
+---
+Each node can have one or more roles, defining for what the node is elegible to.
+
+- `master` - responsible to perform cluster wide actions (create / deleting indices).
+
+- `data` - enables node to store data, performing search queries and modifications.
+
+- `ingest` - enables node to ingest (adding documents to a index) data pipelines.
+
+- `ml` - identifies node as a machine learning node.
+
+- `coordination` - coordinates the distribution of queries and the aggregation among the cluster. This is archieve by disable all other roles. (Usefull for large cluster) 
+```
+node.master: false
+node.data: false
+node.ingest: false
+node.ml: false
+xpack.ml.enabled: false
+```
+
 ## Utils
 ---
 
-- cat - https://www.elastic.co/guide/en/elasticsearch/reference/current/cat.html
+- `cat` - https://www.elastic.co/guide/en/elasticsearch/reference/current/cat.html
 
-- cat nodes API - https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-nodes.html
+- `cat nodes API` - https://www.elastic.co/guide/en/elasticsearch/reference/current/cat-nodes.html
 
-- cat nodes info API - https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-nodes-info.html
+- `cat nodes info API` - https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-nodes-info.html
+
+- `auto_expand_replicas` - Property on index level that allow to expand the number of replicas based on the number of nodes in cluster.
