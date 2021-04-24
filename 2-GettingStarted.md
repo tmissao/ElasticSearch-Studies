@@ -92,6 +92,17 @@ Replication is configured at the index level. Defaults is `1`.
 
 ![Replication](./artifacts/2-Replication.png)
 
+## Routing
+---
+Elastic uses a formula (routing) to define where the document will be stored. Normally the `_routing` value is the document`s ID
+Ex:
+```
+shard_num = hash(_routing) % num_primary_shards
+```
+
+The default routing strategy ensure that the documents are distributed evenly across shards.
+
+![Routing](./artifacts/2-Routing.png)
 ## Snapshot
 ---
 
