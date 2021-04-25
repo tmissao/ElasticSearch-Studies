@@ -36,8 +36,137 @@ POST /_analyze
 }
 ```
 
+## Mapping
+---
+Mapping defines the structure of documents, fields and their data types (likewise a database schema). Used to configure how values are been indexed.
+
+On Elastic Search there are 2 types of mapping:
+
+- `Explicit` - Define by ourselves
+- `Dynamic`  - Generated automatically
+
+`Important !!! `
+
+- `Optional Fields` - All fields in ElasticSearch are **optional**, so **you can leave out** a field when indexing documents. Adding a field mapping does not make a field required. Also, searches automatically handle missing fields.
+
+- `Cannot Update Mapping` - Once a mapping is defined it is impossible to change its type. Since will be necessary to reindex and reanalyses all data.
+
+- `Cannot Delete Mapping` - Once a mapping is defined it is impossible to delete it. Since will be necessary to reindex and reanalyses all data.
+
+
+### Mapping API`s
+
+- `Creating Index with Mapping`
+```bash
+# Creates an Index defining its mapping
+# PUT /<index>
+# { "mappings" : { "properties" : <fields-values> } }
+PUT /reviews
+{
+  "mappings": {
+    "properties": {
+      "rating": { "type" : "float" },
+      "content": { "type": "text" },
+      "product_id": { "type": "integer" },
+      "author": {
+        "properties": {
+          "first_name": { "type": "text" },
+          "last_name": { "type": "text" },
+          "email": { "type": "keyword"  }
+        }
+      }
+    }
+  }
+}
+
+# Or better way:
+PUT /reviews_better
+{
+  "mappings": {
+    "properties": {
+      "rating": { "type" : "float" },
+      "content": { "type": "text" },
+      "product_id": { "type": "integer" },
+      "author.first_name": {"type": "text"},
+      "author.last_name": {"type": "text"},
+      "author.email": {"type": "keyword"}
+    }
+  }
+}
+```
+
+- `Getting Index Mapping`
+```bash
+# GET /<index>/_mapping
+GET /reviews/_mapping
+```
+
+- `Adding field to Existing Mapping`
+```bash
+# Adds a new field to existing mapping
+# PUT /<index>/_mapping
+# { "properties: { <fields-values> }" }
+PUT /reviews/_mapping
+{
+  "properties": {
+    "created_at": { "type": "date" }
+  }
+}
+```
+
+
+## DataTypes
+---
+
+- `Object` - Json Object that supports nested, but have its properties **flattened** (nested relationship is lost).
+``` bash
+{
+  "group" : "fans",
+  "user" : [ 
+    {
+      "first" : "John",
+      "last" :  "Smith"
+    },
+    {
+      "first" : "Alice",
+      "last" :  "White"
+    }
+  ]
+}
+
+# is stored as:
+{
+  "group" :        "fans",
+  "user.first" : [ "alice", "john" ],
+  "user.last" :  [ "smith", "white" ]
+}
+```
+- `nest` - JsonObject nested in other JsonObject preserving the relationship. As a result the nested document is stored as an entire new document (hidden document), and needs a special operator for searching
+```bash
+{
+  "mappings": {
+    "properties": {
+      "user": {
+        "type": "nested" 
+      }
+    }
+  }
+}
+```
+- `keyword` - Used for exact matching fields, like **IDs**, **zip codes**, **status codes** and **hostnames** (Internally used for filtering, sorting and aggregations).
+
+- `date` - Used to store date. The date data should be in long miliseconds (UnixTime * 1000) or in a string format (ISO 8601).
+
+**There is not an array datataype !** - Arrays values are merged together and just analyzed if they are **strings**. Also all array values should be of the same type.
+
 
 ## Utils
 ---
 
 - [Analyzer APis](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-analyze.html)
+
+- [Mapping APis](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices.html#mapping-management)
+
+- [Mapping Parameters](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-params.html)
+
+- [Data Types](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html)
