@@ -114,6 +114,69 @@ PUT /reviews/_mapping
 }
 ```
 
+## Index Template
+---
+
+Allows Elasticsearch to reutilize or detect how configure an index when it is created. Usefull for metrics and logs indeces that have thousands of documents.
+
+Suppose you have an access-logs indeces for every day. So instead of every day create a new index with the same mapping, it is possible to create a template that will be applied when the `index_patterns` matches.
+
+```bash
+PUT /_template/access-logs
+{
+  "index_patterns": ["access-logs-*"],
+  "settings": {
+    "number_of_shards": 2,
+    "index.mapping.coerce": false
+  }, 
+  "mappings": {
+     "properties": {
+       "@timestamp": { "type": "date" },
+       "url.original": { "type": "keyword"},
+       "http.request.referrer": { "type": "keyword" },
+       "http.response.status_code": { "type": "integer"}
+     }
+  }
+}
+```
+Then when creating a new index that matches the pattern all the configuration will be applied
+
+```bash
+PUT /access-logs-2020-01-01
+
+# It is possible check the configuration by using the following command
+GET /access-logs-2020-01-01
+```
+
+## Dynamic Templates
+---
+
+Allows to customize how Elasticsearch maps data beyond the default `dynamic field mapping rules`.
+
+```bash
+PUT /dynamic_template_test
+{
+  "mappings": {
+    # Changes the default role to map a number to long, used integer intead
+    "dynamic_templates": [
+      {
+        "integers": {
+          "match_mapping_type": "long",
+          "mapping": {
+            "type": "integer"
+          }
+        }
+      }  
+    ]
+  }
+}
+
+POST /dynamic_template_test/_doc
+{
+   "value": 5
+}
+```
+
 
 ## DataTypes
 ---
@@ -168,5 +231,11 @@ PUT /reviews/_mapping
 - [Mapping APis](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices.html#mapping-management)
 
 - [Mapping Parameters](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-params.html)
+
+- [Index Template API](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates-v1.html)
+
+- [Dynamic Template](https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html)
+
+- [Elastic Commmon Schema](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html)
 
 - [Data Types](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html)
