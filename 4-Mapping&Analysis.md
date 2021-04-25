@@ -36,6 +36,87 @@ POST /_analyze
 }
 ```
 
+### Custom Analyzer
+``` bash
+PUT /analyzer_test
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "danish_stop": {
+          "type": "stop",
+          "stopwords": "_danish_"
+        }
+      },
+      "analyzer": {
+        "custom_analyzer": {
+          "type": "custom",
+          "char_filter": ["html_strip"],
+          "tokenizer": "standard",
+          "filter": ["lowercase", "danish_stop","asciifolding"]
+        }
+      }
+    }
+  }
+}
+
+POST /analyzer_test/_analyze
+{
+  "analyzer": "custom",
+  "text": "2 guys walk into    a bar, but the third... DUCKS! :--)"  
+}
+```
+
+### Adding an Analyzer
+```bash
+# To update an index analyzer it is necessary to close it (avoiding searches and indexing)
+POST /analyzer_test/_close
+
+# Updates Analyzer
+PUT /analyzer_test/_settings
+{
+  "analysis": {
+    "filter": {
+      "portuguese_stop": {
+        "type": "stop",
+        "stopwords": "_portuguese_"
+      }
+    },
+    "analyzer": {
+      "custom_analyzer": {
+        "type": "custom",
+        "char_filter": ["html_strip"],
+        "tokenizer": "standard",
+        "filter": ["lowercase", "portuguese_stop","asciifolding"]
+      }
+    }
+  }
+}
+
+# After updated it just reopen
+POST /analyzer_test/_open
+```
+
+## Stemming & Stop Words
+---
+
+### - `Stemming`
+Process of reducing the words to their root form, in this way elasticsearch can increase relevance of its searches.
+```
+loved -> love
+drinking -> drink
+I loved drinking bottles of wine on last year`s vacation -> I love drink bottl of wine on last year vacat
+```
+
+### - `Stop Words`
+Words that are filtered out during text analysis, since it does not provide value for relevance score.
+```
+common words like: a, the, at, of, on, in
+```
+
+- `Important! `
+Elasticsearch will always use the same analyzer defined on mapping in search process. Avoinding any mismatch caused by transformations during the analyzer process and it increases the relevance score.
+
 ## Mapping
 ---
 Mapping defines the structure of documents, fields and their data types (likewise a database schema). Used to configure how values are been indexed.
@@ -227,6 +308,8 @@ POST /dynamic_template_test/_doc
 ---
 
 - [Analyzer APis](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-analyze.html)
+
+- [Built in Analyzers](https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-analyzers.html)
 
 - [Mapping APis](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices.html#mapping-management)
 
