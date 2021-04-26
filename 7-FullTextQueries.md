@@ -76,4 +76,4 @@ GET /recipe/_search
 ## Utils
 ---
 
-- [Term-level Queries](https://www.elastic.co/guide/en/elasticsearch/reference/current/term-level-queries.html)
+- [Multi Match Queries](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html)
