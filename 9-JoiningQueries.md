@@ -167,7 +167,7 @@ GET /department/_search
 
 ```
 
-## Joining Queries
+## Joining Queries (Slow Queries!)
 ---
 
 Another way to structure data on elasticsearch is defining relationships between the documents, like a relational database (that is not usual, and it is expensive).
