@@ -1,104 +1,100 @@
-# Multi Level Relationship
+# Terms Lookup Mechanism
 
-Elasticsearch also supports multilevel relationships (Parent -> Children -> Granchildren)
+Terms Lookup Mechanism is a way that elasticsearch allows to use documents themselves as the list of Terms, avoinding unnecessary requests.
 
-Suppose the following example:
+Supposed the following indeces:
 
-![MultiLevelRelationship](./artifacts/9-MultiLevelRelationship.png)
-
-## Creating Index
-```bash
-PUT /company
+ ```bash
+ # Users
+PUT /users/_doc/1
 {
-  "mappings": {
-    "properties": {
-      "join_field": { 
-        "type": "join",
-        "relations": {
-          # Defines Parent/Children Relationship
-          "company": ["department", "supplier"],
-          # Defines Children/Granchildren Relationship
-          "department": "employee"
-        }
-      }
-    }
-  }
-}
-```
-
-### Adding Documents
-
-`Important` - All Children and Granchildren should be store in the same shard than their father, so the routing key will be always the company id that department/employees belong to.
-
-```bash
-
-PUT /company/_doc/1
-{
-  "name": "My Company Inc.",
-  "join_field": "company"
+  "name": "John Roberts",
+  "following" : [2, 3]
 }
 
-PUT /company/_doc/2?routing=1
+PUT /users/_doc/2
 {
-  "name": "Development",
-  "join_field": {
-    "name": "department",
-    "parent": 1
-  }
+  "name": "Elizabeth Ross",
+  "following" : []
 }
 
-PUT /company/_doc/3?routing=1
+PUT /users/_doc/3
 {
-  "name": "Bo Andersen",
-  "join_field": {
-    "name": "employee",
-    "parent": 2
-  }
+  "name": "Jeremy Brooks",
+  "following" : [1, 2]
 }
 
-PUT /company/_doc/4
+PUT /users/_doc/4
 {
-  "name": "Another Company, Inc.",
-  "join_field": "company"
+  "name": "Diana Moore",
+  "following" : [3, 1]
 }
 
-PUT /company/_doc/5?routing=4
+# Stories
+PUT /stories/_doc/1
 {
-  "name": "Marketing",
-  "join_field": {
-    "name": "department",
-    "parent": 4
-  }
+  "user": 3,
+  "content": "Wow look, a penguin!"
 }
 
-PUT /company/_doc/6?routing=4
+PUT /stories/_doc/2
 {
-  "name": "John Doe",
-  "join_field": {
-    "name": "employee",
-    "parent": 5
-  }
+  "user": 1,
+  "content": "Just another day at the office... #coffee"
 }
-```
 
-## Querying Documents
-```bash
-GET /company/_search
+PUT /stories/_doc/3
+{
+  "user": 1,
+  "content": "Making search great again! #elasticsearch #elk"
+}
+
+PUT /stories/_doc/4
+{
+  "user": 4,
+  "content": "Had a blast today! #rollercoaster #amusementpark"
+}
+
+PUT /stories/_doc/5
+{
+  "user": 4,
+  "content": "Yay, I just got hired as an Elasticsearch consultant - so excited!"
+}
+
+PUT /stories/_doc/6
+{
+  "user": 2,
+  "content": "Chilling at the beach @ Greece #vacation #goodtimes"
+}
+
+ ```
+
+ Now, a logged user ( User 1 ) wanna see all his stories, in other words, all the stories of their friends. So, it is necessaryL
+
+ 1. Locate Who User 1 is following
+ 2. Locate all stories from Who User 1 is following
+
+- `Lookup Query`
+
+ ```bash
+ GET /stories/_search
 {
   "query": {
-    "has_child": {
-      "type": "department",
-      "query": {
-        "has_child": {
-          "type": "employee",
-          "query": {
-            "term": {
-              "name.keyword": "John Doe"
-            }
-          }
-        }
+    "terms": {
+      "user": {
+        # Users the _doc/1 with field `following` as input for terms in the search
+        "index": "users",
+        "id": "1",
+        "path": "following"
       }
     }
   }
 }
-```
+ ```
+
+  ![LookupMechanism](./artifacts/9-LookupMechanism.png)
+
+  ## Utils
+---
+
+- [LookupMechanism](https://www.elastic.co/blog/terms-filter-lookup)
