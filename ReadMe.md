@@ -5,7 +5,7 @@ This project intends to summarize all the knowledge earned during my studies of 
 It can be divided into the following sections:
 
 -  [`Introduction`](./01-Introduction.md)
--  [`Getting Started`](.02-GettingStarted.md)
+-  [`Getting Started`](./02-GettingStarted.md)
 -  [`Managing Documents`](./03-ManagingDocuments.md)
 -  [`Mapping & Analysis`](./04-Mapping&Analysis.md)
 -  [`Reindexing`](./04-Reindexing.md)
