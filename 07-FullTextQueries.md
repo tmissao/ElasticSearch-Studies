@@ -73,6 +73,64 @@ GET /recipe/_search
 }
 ```
 
+- `Allows Terms Between the searched phase (slop)`
+```bash
+# GET /<index>/_search
+# { "query": { "match_phrase": { "<field>": { "query": "<value>", "slop": <number> }}}}
+
+PUT /proximity/_doc/1
+{
+  "title": "Spicy Sauce"
+}
+
+PUT /proximity/_doc/2
+{
+  "title": "Spicy Tomato Sauce"
+}
+
+PUT /proximity/_doc/3
+{
+  "title": "Spicy Tomato and Garlic Sauce"
+}
+
+
+GET /proximity/_search
+{
+  "query": {
+    "match_phrase": {
+      "title": {
+        "query": "spicy sauce",
+        # Allows this quantity of terms to be between the search phase, this ways _doc 1 and 2 will be a match
+        "slop": 1
+      }
+    }
+  }
+}
+```
+![MatchPhraseSlop](./artifacts/07-MatchPhraseSlop.png)
+
+- `Fuzziness (Handling Typos)`
+
+Allows Elasticsearch to correct typos in the input of the search
+
+```bash
+# GET /<index>/_search
+# "{ "query": { "match": { "<field>" : { "query": "<value>", fuzziness: "auto|number" }}}}"
+
+GET /recipe/_search
+{
+  "query": {
+    "match": {
+      "title": {
+        "query": "l0bster",
+        "fuzziness": "auto"
+      }
+    }
+  }
+}
+``` 
+![Fuzziness](./artifacts/7-Fuzziness.png)
+
 ## Utils
 ---
 
